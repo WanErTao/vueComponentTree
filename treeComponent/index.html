@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <style>
+    ul {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    
+    .tree-menu {
+        width: 360px;
+        height: 100%;
+        padding: 0px 12px;
+        border-right: 1px solid #e6e9f0;
+    }
+    
+    .tree-menu-comm span {
+        display: block;
+        font-size: 12px;
+        position: relative;
+    }
+    
+    .tree-contro .ico {
+        background-position: 3px -92px;
+    }
+    
+    .tree-title .ico {
+        position: absolute;
+        left: -13px;
+        top: 0;
+        width: 15px;
+        height: 26px;
+        background: url(img/folder-tree.png) no-repeat 4px -43px;
+        opacity: 0.8;
+    }
+    
+    .tree-menu-comm span strong {
+        display: block;
+        width: 82%;
+        position: relative;
+        line-height: 22px;
+        padding: 2px 0;
+        padding-left: 5px;
+        color: #161719;
+        font-weight: normal;
+    }
+    
+    .tree-nav {
+        background: #e7f2fe;
+        border: 1px solid #bfdaf4;
+        padding-left: 14px;
+        margin-left: 0px;
+    }
+    
+    .tree-title {
+        border: 1px solid #fff;
+        margin-top: 1px;
+    }
+    /*无箭头*/
+    
+    .tree-contro-none .ico {
+        background-position: -999px -99px;
+    }
+    /*箭头朝下*/
+    
+    .tree-contro .ico {
+        background-position: 3px -92px;
+    }
+    </style>
+    <script src="vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!--<div class="tree-menu-comm tree-menu">
+            <ul>
+                <li>
+                    <div class="tree-title" style="padding-left: 16px;"><span><strong>目录</strong> <i class="ico"></i></span></div>
+                    <ul>
+                        <li>
+                            <div class="tree-title" style="padding-left: 32px;"><span><strong>我的音乐</strong> <i class="ico"></i></span></div>
+                            <ul>
+                                <li>
+                                    <div class="tree-title" style="padding-left: 48px;"><span><strong>周杰伦</strong> <i class="ico"></i></span></div>
+                                    <ul>
+                                        <li>
+                                            <div class="tree-title tree-contro-none" style="padding-left: 64px;"><span><strong>发如雪</strong> <i class="ico"></i></span></div>
+                                            
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <div class="tree-title" style="padding-left: 48px;"><span><strong>王杰</strong> <i class="ico"></i></span></div>
+                                    <ul>
+                                        <li>
+                                            <div class="tree-title tree-contro-none" style="padding-left: 64px;"><span><strong>一场游戏一场梦</strong> <i class="ico"></i></span></div>
+                                            
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="tree-title tree-contro-none" style="padding-left: 32px;"><span><strong>我的照片</strong> <i class="ico"></i></span></div>
+                            
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>-->
+        <tree-meanu :data1='treeList' @on-select-change='selectChange'></tree-meanu>
+    </div>
+    <script>
+    /*
+    				传入的数据结构：
+    					[
+    					{
+    						title:XXX,
+    						children:[
+    							{
+    								title:XXXX,
+    								chidren:[]
+    							}
+    						]
+    					}]
+
+    				设置的props：
+    					data 数据结构 默认为 []
+
+    				定制模板:
+    					不可定制
+
+    				监控状态变化：
+    					事件名on-select-change 点击树节点触发  ??
+    			*/ 
+        Vue.component('tree-meanu',{
+            props:{
+                data1:{
+                    type:Array,
+                    default:[]
+                }
+            },
+            template:`
+                <div class="tree-menu-comm tree-menu">
+                    <tree-list :data2='data1'></tree-list>
+                </div>
+            `
+        })
+
+        Vue.component('tree-list',{
+            props:{
+                data2:{
+                    type:Array,
+                    default:[]
+                },
+                increment:{
+                    type:Number,
+                    default:0
+                }
+            },
+            computed:{
+                count(){
+                    var c =this.increment;
+                    return ++c;
+                },
+                stylePadding(){
+                    return {'padding-left':this.count*16+'px'}
+                }
+            },
+            methods:{
+                change(){
+                    this.$emit('on-select-change')
+                }
+            },
+            template:`
+                <ul>
+                    <li v-for='item of data2'>
+                        <div class="tree-title" :style="[stylePadding]">
+                            <span><strong>{{item.title}}</strong> <i class="ico" @click='change'></i></span>
+                        </div>
+                        <tree-list v-if='item.children' :data2='item.children' :increment='count'></tree-list>
+                    </li>
+                </ul>
+            `
+        })
+
+        var data = [{
+            title: "目录",
+            children: [{
+                title: "我的音乐",
+                children: [{
+                    title: "周杰伦",
+                    children: [{
+                        title: "发如雪"
+                    }]
+                }, {
+                    title: "王杰",
+                    children: [{
+                        title: "一场游戏一场梦"
+                    }]
+                }]
+            }, {
+                title: "我的照片"
+            }]
+        }];
+
+        new Vue({
+            el:'#app',
+            data:{
+                treeList:data
+            },
+            methods:{
+                selectChange(){
+                    alert(0)
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
